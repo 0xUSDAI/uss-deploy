@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// DssDeploy.sol
+// UssDeploy.sol
 //
-// Copyright (C) 2018-2022 Dai Foundation
+// Copyright (C) 2018-2022 USDai Foundation
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -22,25 +22,25 @@ pragma solidity >=0.5.12;
 import {DSAuth, DSAuthority} from "ds-auth/auth.sol";
 import {DSPause} from "ds-pause/pause.sol";
 
-import {Vat} from "dss/vat.sol";
-import {Jug} from "dss/jug.sol";
-import {Vow} from "dss/vow.sol";
-import {Cat} from "dss/cat.sol";
-import {Dog} from "dss/dog.sol";
-import {DaiJoin} from "dss/join.sol";
-import {Flapper} from "dss/flap.sol";
-import {Flopper} from "dss/flop.sol";
-import {Flipper} from "dss/flip.sol";
-import {Clipper} from "dss/clip.sol";
+import {Vat} from "uss/vat.sol";
+import {Jug} from "uss/jug.sol";
+import {Vow} from "uss/vow.sol";
+import {Cat} from "uss/cat.sol";
+import {Dog} from "uss/dog.sol";
+import {USDaiJoin} from "uss/join.sol";
+import {Flapper} from "uss/flap.sol";
+import {Flopper} from "uss/flop.sol";
+import {Flipper} from "uss/flip.sol";
+import {Clipper} from "uss/clip.sol";
 import {LinearDecrease,
         StairstepExponentialDecrease,
-        ExponentialDecrease} from "dss/abaci.sol";
-import {Dai} from "dss/dai.sol";
-import {Cure} from "dss/cure.sol";
-import {End} from "dss/end.sol";
+        ExponentialDecrease} from "uss/abaci.sol";
+import {USDai} from "uss/usdai.sol";
+import {Cure} from "uss/cure.sol";
+import {End} from "uss/end.sol";
 import {ESM} from "esm/ESM.sol";
-import {Pot} from "dss/pot.sol";
-import {Spotter} from "dss/spot.sol";
+import {Pot} from "uss/pot.sol";
+import {Spotter} from "uss/spot.sol";
 
 contract VatFab {
     function newVat(address owner) public returns (Vat vat) {
@@ -83,16 +83,16 @@ contract DogFab {
 }
 
 contract DaiFab {
-    function newDai(address owner, uint chainId) public returns (Dai dai) {
-        dai = new Dai(chainId);
-        dai.rely(owner);
-        dai.deny(address(this));
+    function newDai(address owner, uint chainId) public returns (USDai usdai) {
+        usdai = new USDai(chainId);
+        usdai.rely(owner);
+        usdai.deny(address(this));
     }
 }
 
 contract DaiJoinFab {
-    function newDaiJoin(address vat, address dai) public returns (DaiJoin daiJoin) {
-        daiJoin = new DaiJoin(vat, dai);
+    function newDaiJoin(address vat, address usdai) public returns (USDaiJoin usdaiJoin) {
+        usdaiJoin = new USDaiJoin(vat, usdai);
     }
 }
 
@@ -192,7 +192,7 @@ contract PauseFab {
     }
 }
 
-contract DssDeploy is DSAuth {
+contract UssDeploy is DSAuth {
     VatFab     public vatFab;
     JugFab     public jugFab;
     VowFab     public vowFab;
@@ -217,8 +217,8 @@ contract DssDeploy is DSAuth {
     Vow     public vow;
     Cat     public cat;
     Dog     public dog;
-    Dai     public dai;
-    DaiJoin public daiJoin;
+    USDai     public usdai;
+    USDaiJoin public usdaiJoin;
     Flapper public flap;
     Flopper public flop;
     Spotter public spotter;
@@ -305,9 +305,9 @@ contract DssDeploy is DSAuth {
         require(address(vat) != address(0), "Missing previous step");
 
         // Deploy
-        dai = daiFab.newDai(address(this), chainId);
-        daiJoin = daiJoinFab.newDaiJoin(address(vat), address(dai));
-        dai.rely(address(daiJoin));
+        usdai = daiFab.newDai(address(this), chainId);
+        usdaiJoin = daiJoinFab.newDaiJoin(address(vat), address(usdai));
+        usdai.rely(address(usdaiJoin));
     }
 
     function deployTaxation() public auth {
@@ -386,7 +386,7 @@ contract DssDeploy is DSAuth {
     }
 
     function deployPause(uint delay, address authority) public auth {
-        require(address(dai) != address(0), "Missing previous step");
+        require(address(usdai) != address(0), "Missing previous step");
         require(address(end) != address(0), "Missing previous step");
 
         pause = pauseFab.newPause(delay, address(0), authority);
@@ -479,7 +479,7 @@ contract DssDeploy is DSAuth {
         vow.deny(address(this));
         jug.deny(address(this));
         pot.deny(address(this));
-        dai.deny(address(this));
+        usdai.deny(address(this));
         spotter.deny(address(this));
         flap.deny(address(this));
         flop.deny(address(this));

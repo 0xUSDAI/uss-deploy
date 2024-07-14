@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// DssDeploy.t.base.sol
+// UssDeploy.t.base.sol
 //
-// Copyright (C) 2018-2022 Dai Foundation
+// Copyright (C) 2018-2022 USDai Foundation
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -22,10 +22,10 @@ pragma solidity >=0.5.12;
 import {DSTest} from "ds-test/test.sol";
 import {DSToken} from "ds-token/token.sol";
 import {DSValue} from "ds-value/value.sol";
-import {GemJoin} from "dss/join.sol";
-import {LinearDecrease} from "dss/abaci.sol";
+import {GemJoin} from "uss/join.sol";
+import {LinearDecrease} from "uss/abaci.sol";
 
-import "./DssDeploy.sol";
+import "./UssDeploy.sol";
 import {GovActions} from "./govActions.sol";
 
 interface Hevm {
@@ -55,11 +55,11 @@ contract FakeUser {
     }
 
     function doDaiJoin(address obj, address urn, uint wad) public {
-        DaiJoin(obj).join(urn, wad);
+        USDaiJoin(obj).join(urn, wad);
     }
 
     function doDaiExit(address obj, address guy, uint wad) public {
-        DaiJoin(obj).exit(guy, wad);
+        USDaiJoin(obj).exit(guy, wad);
     }
 
     function doWethJoin(address obj, address gem, address urn, uint wad) public {
@@ -67,8 +67,8 @@ contract FakeUser {
         GemJoin(gem).join(urn, wad);
     }
 
-    function doFrob(address obj, bytes32 ilk, address urn, address gem, address dai, int dink, int dart) public {
-        Vat(obj).frob(ilk, urn, gem, dai, dink, dart);
+    function doFrob(address obj, bytes32 ilk, address urn, address gem, address usdai, int dink, int dart) public {
+        Vat(obj).frob(ilk, urn, gem, usdai, dink, dart);
     }
 
     function doFork(address obj, bytes32 ilk, address src, address dst, int dink, int dart) public {
@@ -224,7 +224,7 @@ contract MockGuard {
     }
 }
 
-contract DssDeployTestBase is DSTest, ProxyActions {
+contract UssDeployTestBase is DSTest, ProxyActions {
     Hevm hevm;
 
     VatFab vatFab;
@@ -246,7 +246,7 @@ contract DssDeployTestBase is DSTest, ProxyActions {
     ESMFab esmFab;
     PauseFab pauseFab;
 
-    DssDeploy dssDeploy;
+    UssDeploy ussDeploy;
 
     DSToken gov;
     DSValue pipETH;
@@ -267,8 +267,8 @@ contract DssDeployTestBase is DSTest, ProxyActions {
     Dog dog;
     Flapper flap;
     Flopper flop;
-    Dai dai;
-    DaiJoin daiJoin;
+    USDai usdai;
+    USDaiJoin usdaiJoin;
     Spotter spotter;
     Pot pot;
     Cure cure;
@@ -314,9 +314,9 @@ contract DssDeployTestBase is DSTest, ProxyActions {
         pauseFab = new PauseFab();
         govActions = new GovActions();
 
-        dssDeploy = new DssDeploy();
+        ussDeploy = new UssDeploy();
 
-        dssDeploy.addFabs1(
+        ussDeploy.addFabs1(
             vatFab,
             jugFab,
             vowFab,
@@ -326,7 +326,7 @@ contract DssDeployTestBase is DSTest, ProxyActions {
             daiJoinFab
         );
 
-        dssDeploy.addFabs2(
+        ussDeploy.addFabs2(
             flapFab,
             flopFab,
             flipFab,
@@ -359,46 +359,46 @@ contract DssDeployTestBase is DSTest, ProxyActions {
     }
 
     function deployKeepAuth() public {
-        dssDeploy.deployVat();
-        dssDeploy.deployDai(99);
-        dssDeploy.deployTaxation();
-        dssDeploy.deployAuctions(address(gov));
-        dssDeploy.deployLiquidator();
-        dssDeploy.deployEnd();
-        dssDeploy.deployPause(0, address(authority));
-        dssDeploy.deployESM(address(gov), 10);
+        ussDeploy.deployVat();
+        ussDeploy.deployDai(99);
+        ussDeploy.deployTaxation();
+        ussDeploy.deployAuctions(address(gov));
+        ussDeploy.deployLiquidator();
+        ussDeploy.deployEnd();
+        ussDeploy.deployPause(0, address(authority));
+        ussDeploy.deployESM(address(gov), 10);
 
-        vat = dssDeploy.vat();
-        jug = dssDeploy.jug();
-        vow = dssDeploy.vow();
-        cat = dssDeploy.cat();
-        dog = dssDeploy.dog();
-        flap = dssDeploy.flap();
-        flop = dssDeploy.flop();
-        dai = dssDeploy.dai();
-        daiJoin = dssDeploy.daiJoin();
-        spotter = dssDeploy.spotter();
-        pot = dssDeploy.pot();
-        cure = dssDeploy.cure();
-        end = dssDeploy.end();
-        esm = dssDeploy.esm();
-        pause = dssDeploy.pause();
+        vat = ussDeploy.vat();
+        jug = ussDeploy.jug();
+        vow = ussDeploy.vow();
+        cat = ussDeploy.cat();
+        dog = ussDeploy.dog();
+        flap = ussDeploy.flap();
+        flop = ussDeploy.flop();
+        usdai = ussDeploy.usdai();
+        usdaiJoin = ussDeploy.usdaiJoin();
+        spotter = ussDeploy.spotter();
+        pot = ussDeploy.pot();
+        cure = ussDeploy.cure();
+        end = ussDeploy.end();
+        esm = ussDeploy.esm();
+        pause = ussDeploy.pause();
         authority.permit(address(this), address(pause), bytes4(keccak256("plot(address,bytes32,bytes,uint256)")));
 
         weth = new WETH();
         ethJoin = new GemJoin(address(vat), "ETH", address(weth));
-        dssDeploy.deployCollateralFlip("ETH", address(ethJoin), address(pipETH));
+        ussDeploy.deployCollateralFlip("ETH", address(ethJoin), address(pipETH));
 
         col = new DSToken("COL");
         colJoin = new GemJoin(address(vat), "COL", address(col));
-        dssDeploy.deployCollateralFlip("COL", address(colJoin), address(pipCOL));
+        ussDeploy.deployCollateralFlip("COL", address(colJoin), address(pipCOL));
 
         col2 = new DSToken("COL2");
         col2Join = new GemJoin(address(vat), "COL2", address(col2));
         LinearDecrease calc = calcFab.newLinearDecrease(address(this));
         calc.file(bytes32("tau"), 1 hours);
 
-        dssDeploy.deployCollateralClip("COL2", address(col2Join), address(pipCOL2), address(calc));
+        ussDeploy.deployCollateralClip("COL2", address(col2Join), address(pipCOL2), address(calc));
 
         // Set Params
         this.file(address(vat), bytes32("Line"), uint(10000 * 10 ** 45));
@@ -406,12 +406,12 @@ contract DssDeployTestBase is DSTest, ProxyActions {
         this.file(address(vat), bytes32("COL"), bytes32("line"), uint(10000 * 10 ** 45));
         this.file(address(vat), bytes32("COL2"), bytes32("line"), uint(10000 * 10 ** 45));
 
-        pipETH.poke(bytes32(uint(300 * 10 ** 18))); // Price 300 DAI = 1 ETH (precision 18)
-        pipCOL.poke(bytes32(uint(45 * 10 ** 18))); // Price 45 DAI = 1 COL (precision 18)
-        pipCOL2.poke(bytes32(uint(30 * 10 ** 18))); // Price 30 DAI = 1 COL2 (precision 18)
-        (ethFlip,,) = dssDeploy.ilks("ETH");
-        (colFlip,,) = dssDeploy.ilks("COL");
-        (,col2Clip,) = dssDeploy.ilks("COL2");
+        pipETH.poke(bytes32(uint(300 * 10 ** 18))); // Price 300 USDAI = 1 ETH (precision 18)
+        pipCOL.poke(bytes32(uint(45 * 10 ** 18))); // Price 45 USDAI = 1 COL (precision 18)
+        pipCOL2.poke(bytes32(uint(30 * 10 ** 18))); // Price 30 USDAI = 1 COL2 (precision 18)
+        (ethFlip,,) = ussDeploy.ilks("ETH");
+        (colFlip,,) = ussDeploy.ilks("COL");
+        (,col2Clip,) = ussDeploy.ilks("COL2");
         this.file(address(spotter), "ETH", "mat", uint(1500000000 ether)); // Liquidation ratio 150%
         this.file(address(spotter), "COL", "mat", uint(1100000000 ether)); // Liquidation ratio 110%
         this.file(address(spotter), "COL2", "mat", uint(1500000000 ether)); // Liquidation ratio 150%
@@ -433,6 +433,6 @@ contract DssDeployTestBase is DSTest, ProxyActions {
 
     function deploy() public {
         deployKeepAuth();
-        dssDeploy.releaseAuth();
+        ussDeploy.releaseAuth();
     }
 }
